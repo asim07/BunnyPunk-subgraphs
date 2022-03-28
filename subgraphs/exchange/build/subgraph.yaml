@@ -1,0 +1,59 @@
+specVersion: 0.0.2
+description: Glide Finance is a decentralized protocol for automated token exchange on the
+  Elastos Smart Chain (ESC).
+repository: https://github.com/glide-finance
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Factory
+    network: mainnet
+    source:
+      address: "0xaAbe38153b25f0d4b2bDa620f67059B3a45334e5"
+      abi: Factory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: Factory/Factory.wasm
+      entities:
+        - Pair
+        - Token
+      abis:
+        - name: Factory
+          file: Factory/abis/Factory.json
+        - name: ERC20
+          file: Factory/abis/ERC20.json
+      eventHandlers:
+        - event: PairCreated(indexed address,indexed address,address,uint256)
+          handler: handlePairCreated
+templates:
+  - kind: ethereum/contract
+    name: Pair
+    network: mainnet
+    source:
+      abi: Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: templates/Pair/Pair.wasm
+      entities:
+        - Pair
+        - Token
+      abis:
+        - name: Factory
+          file: Pair/abis/Factory.json
+        - name: Pair
+          file: Pair/abis/Pair.json
+      eventHandlers:
+        - event: Mint(indexed address,uint256,uint256)
+          handler: handleMint
+        - event: Burn(indexed address,uint256,uint256,indexed address)
+          handler: handleBurn
+        - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleSwap
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Sync(uint112,uint112)
+          handler: handleSync
